@@ -165,7 +165,7 @@ def sine_gen_with_rr_v4(min_amp, max_amp, samples, duration, hr, rr, rr_step):
     return wave
 
 
-def main(hr, rr, rr_step, max_amp, min_amp, waveform, minute, duration=60, samples=410):
+def main(hr, rr, rr_step, max_amp, min_amp, waveform, minute, duration=180, samples=410):
     freq = hr/60
     delay_req = 1/(samples)
 
@@ -184,16 +184,17 @@ def main(hr, rr, rr_step, max_amp, min_amp, waveform, minute, duration=60, sampl
             for i in range(0,len(wave)-1):
                 val = int(wave[i])
                 dac.raw_value = val
-                delay = delay_req - 0.00041 - 0.00025   
+                # delay = delay_req - 0.00041 - 0.00025   
+                delay = delay_req - 0.00041 - 0.00025 - 0.000035
                 time.sleep(delay)
-
+ 
             end_time = time.time()
             # print('End time:', end_time)
             
             ## Write Labels for 10s, each label after 1s
             hr_array = np.repeat(hr, duration)
             rr_array = np.repeat(rr, duration)
-            write_mqtt(hr_array, rr_array, start_time, 1)
+            # write_mqtt(hr_array, rr_array, start_time, 1)
 
             final_time = time.time()
             print('Final time:', final_time)
