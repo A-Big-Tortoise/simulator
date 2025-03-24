@@ -20,8 +20,8 @@ import netifaces
 """
 
 
-def get_mac(interface='eth0'):
-    return netifaces.ifaddresses(interface)[netifaces.AF_LINK][0]['addr']
+# def get_mac(interface='eth0'):
+#     return netifaces.ifaddresses(interface)[netifaces.AF_LINK][0]['addr']
 
 
 def pack_beddot_data(mac_addr, timestamp, data_interval, data):
@@ -39,8 +39,28 @@ def pack_beddot_data(mac_addr, timestamp, data_interval, data):
     return packed_data
 
 
+# def write_mqtt(hrdata, rrdata, timestamp, fs):
+#     mac_addr=get_mac()
+#     timestamp = int(timestamp * 1000000)
+#     hrdata = np.int32(hrdata)
+#     rrdata = np.int32(rrdata)
+#     Ts = int((1/fs) * 1000000)
+#     packed_data_1 = pack_beddot_data(mac_addr, timestamp, Ts, hrdata) # 10000 equates to fs=1/0.01=100
+#     packed_data_2 = pack_beddot_data(mac_addr, timestamp, Ts, rrdata)
+
+#     client = mqtt.Client()
+#     # client.connect("yuantzg.com", 9183)
+#     client.connect("sensorweb.us", 1883)
+#     mqtt_thread = threading.Thread(target=lambda: client.loop_forever())
+#     mqtt_thread.start()
+
+#     mac_addr_str = mac_addr.replace(":", "")
+#     client.publish(f"/UGA/{mac_addr_str}/hrlabel", packed_data_1, qos=1)
+#     client.publish(f"/UGA/{mac_addr_str}/rrlabel", packed_data_2, qos=1)
+#     print('Published')
+#     return None
 def write_mqtt(hrdata, rrdata, timestamp, fs):
-    mac_addr=get_mac()
+    mac_addr="12:02:12:02:12:02"
     timestamp = int(timestamp * 1000000)
     hrdata = np.int32(hrdata)
     rrdata = np.int32(rrdata)
@@ -49,16 +69,15 @@ def write_mqtt(hrdata, rrdata, timestamp, fs):
     packed_data_2 = pack_beddot_data(mac_addr, timestamp, Ts, rrdata)
 
     client = mqtt.Client()
-    client.connect("yuantzg.com", 9183)
+    client.connect("sensorweb.us", 1883)
     mqtt_thread = threading.Thread(target=lambda: client.loop_forever())
     mqtt_thread.start()
 
-    mac_addr_str = mac_addr.replace(":", "")
-    client.publish(f"/UGA/{mac_addr_str}/hrlabel", packed_data_1, qos=1)
-    client.publish(f"/UGA/{mac_addr_str}/rrlabel", packed_data_2, qos=1)
+
+    client.publish("/UGA/120212021202/hrlabel", packed_data_1, qos=1)
+    client.publish("/UGA/120212021202/rrlabel", packed_data_2, qos=1)
     print('Published')
     return None
-
 
 """
 ************************ Used for Waveform Generation ************************
@@ -177,7 +196,7 @@ def sine_gen_with_rr_v4(min_amp, max_amp, samples, duration, hr, rr, rr_step):
     return wave
 
 
-def main(hr, rr, rr_step, max_amp, min_amp, waveform, minute, duration=180, samples=410):
+def main(hr, rr, rr_step, max_amp, min_amp, waveform, minute, duration=300, samples=410):
     freq = hr/60
     delay_req = 1/(samples)
 
@@ -234,32 +253,31 @@ if __name__== '__main__':
     option 5, HR 160, RR 40
     """
     parser = argparse.ArgumentParser(description='Heartbeat Simulator', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--option', type=int, help='Different HR and RR Combination')
-    parser.add_argument('--minute', type=int, default=3, help='Length of Working (Unit: min), default=3')
+    parser.add_argument('--minute', type=int, default=1, help='Length of Working (Unit: min), default=3')
     args = parser.parse_args()
 
-    coeff = 0.67
-    if args.option == 1:
-        hr, rr, rr_step = 40, 8, 0.01
-        max_amp, min_amp = 200, 0
-        waveform = 'sine'
-    elif args.option == 2:
-        hr, rr, rr_step = 64, 16, 0.02
-        max_amp, min_amp =  256, 0
-        waveform = 'sine'
-    elif args.option == 3:
-        hr, rr, rr_step = 96, 24, 0.04
-        max_amp, min_amp =  256, 0
-        waveform = 'sine'   
-    elif args.option == 4:
-        hr, rr, rr_step = 128, 32, 0.04
-        max_amp, min_amp =  256, 0
-        waveform = 'pulse'  
-    elif args.option == 5:
-        hr, rr, rr_step = 160, 40, 0.04
-        max_amp, min_amp =  512, 0
-        waveform = 'pulse'  
-    
-    print(get_mac())
-    
-    main(hr, rr, rr_step, max_amp, min_amp, waveform, args.minute)
+    for option in range(1, 6):
+
+        if option == 1:
+            hr, rr, rr_step = 40, 8, 0.01
+            max_amp, min_amp = 200, 0
+            waveform = 'sine'
+        elif option == 2:
+            hr, rr, rr_step = 64, 16, 0.02
+            max_amp, min_amp =  256, 0
+            waveform = 'sine'
+        elif option == 3:
+            hr, rr, rr_step = 96, 24, 0.04
+            max_amp, min_amp =  256, 0
+            waveform = 'sine'   
+        elif option == 4:
+            hr, rr, rr_step = 128, 32, 0.04
+            max_amp, min_amp =  256, 0
+            waveform = 'pulse'  
+        elif option == 5:
+            hr, rr, rr_step = 160, 40, 0.04
+            max_amp, min_amp =  512, 0
+            waveform = 'pulse'  
+        
+        # print(get_mac())
+        main(hr, rr, rr_step, max_amp, min_amp, waveform, args.minute)

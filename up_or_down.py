@@ -25,7 +25,7 @@ def main(max_amp, min_amp, duration=180, samples=410):
         # wave = np.concatenate([np.zeros(samples * 3), np.ones(samples * 3)])
         # wave = np.concatenate([np.ones(samples * 3), np.zeros(samples * 3)])
         #wave = min_amp + ((wave - np.min(wave)) / (np.max(wave) - np.min(wave))) * (max_amp - min_amp)
-        wave = np.ones(samples * 5)
+        wave = np.ones(samples * duration)
         wave = max_amp * wave
         start_time = time.time()
         print('Start time:', start_time)
