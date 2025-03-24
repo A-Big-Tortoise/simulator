@@ -17,7 +17,7 @@ def sine_wave(max_amp, min_amp, samples, duty_cycle):
     return apply_amp(wave, max_amp, min_amp)
 
 
-wave = sine_wave(512, 0, 410, 0.05)
+wave = sine_wave(512, 0, 410, 0.75)
 plt.figure(figsize=(10, 3))
 plt.plot(wave)
 plt.savefig('/home/simulator/heartsim_easy/figs/sine_wave_base.png')

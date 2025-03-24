@@ -72,10 +72,10 @@ def generate_increasing_amplitude_wave_array(i,step_size):
     return wave_array
 
 
-def pulse_base(min_val, max_val, samples, duration):
+def pulse_base(min_val, max_val, samples, duty_circle, duration):
     fs = samples  # Sampling frequency in Hz
     t = np.linspace(0, duration, fs, endpoint=False)  # 1 second duration
-    duty_cycle = 0.05  # 50% duty cycle
+    # duty_cycle = 0.05  # 50% duty cycle
     f_hr = 1
     amp =1
     # Generate pulse waveform
@@ -88,8 +88,8 @@ def pulse_base(min_val, max_val, samples, duration):
     return pulse_wave
 
 
-def pulse_gen_with_rr(min_val, max_val, samples, duration, hr, rr, rr_step):
-    wave_a = pulse_base(min_val, max_val, samples, 1)
+def pulse_gen_with_rr(min_val, max_val, samples, duty_circle, duration, hr, rr, rr_step):
+    wave_a = pulse_base(min_val, max_val, samples, duty_circle, 1)
 
     val = int(np.round(hr/rr))
     reps = int(np.round(rr/60*duration))
@@ -122,37 +122,37 @@ def sine_wave_base(samples, duty_cycle):
 
 
 
-def sine_gen_with_rr_dc(amp, samples, duty_cycle):
+# def sine_gen_with_rr_dc(amp, samples, duty_cycle):
 
-    f_hr = 1
-    duration = 1
-    sampling_rate = samples
-    phase = 0
+#     f_hr = 1
+#     duration = 1
+#     sampling_rate = samples
+#     phase = 0
 
-    val = int(duty_cycle*samples)
-    rem = samples - val
-    zer_array = np.zeros(rem)
+#     val = int(duty_cycle*samples)
+#     rem = samples - val
+#     zer_array = np.zeros(rem)
   
-    t = np.linspace(0, duration, int(sampling_rate * duration), endpoint=False)
-    sine_wave = np.sin(2 * np.pi * f_hr * t - phase)
-    wave = sine_wave
+#     t = np.linspace(0, duration, int(sampling_rate * duration), endpoint=False)
+#     sine_wave = np.sin(2 * np.pi * f_hr * t - phase)
+#     wave = sine_wave
 
-    # wave = signal.resample(wave, val)
-    # wave = np.concatenate((zer_array, wave),axis=0)
-    wave = np.where(wave < 0, 0, wave)
+#     # wave = signal.resample(wave, val)
+#     # wave = np.concatenate((zer_array, wave),axis=0)
+#     wave = np.where(wave < 0, 0, wave)
 
-    return wave
+#     return wave
 
 
-def sine_gen_with_rr_v4(min_amp, max_amp, samples, duration, hr, rr, rr_step):
+def sine_gen_with_rr_v4(min_amp, max_amp, samples, duty_circle, duration, hr, rr, rr_step):
     min_val = min_amp
     max_val = max_amp
 
-    duty_cycle = 0.75
+    # duty_cycle = 0.75
 
     ## Select base sine wave - with or without Duty Cycle
-    wave = sine_gen_with_rr_dc(max_val, samples, duty_cycle)
-    # wave = sine_wave_base(samples, 0.5)
+    # wave = sine_gen_with_rr_dc(max_val, samples, duty_cycle)
+    wave = sine_wave_base(samples, duty_circle)
 
     ### For RR effect uncomment this
     val = int(np.round(hr/rr))
@@ -177,7 +177,7 @@ def sine_gen_with_rr_v4(min_amp, max_amp, samples, duration, hr, rr, rr_step):
     return wave
 
 
-def main(hr, rr, rr_step, max_amp, min_amp, waveform, minute, duration=180, samples=410):
+def main(hr, rr, rr_step, max_amp, min_amp, waveform, duty_circle, minute, duration=180, samples=410):
     freq = hr/60
     delay_req = 1/(samples)
 
@@ -187,9 +187,9 @@ def main(hr, rr, rr_step, max_amp, min_amp, waveform, minute, duration=180, samp
     try:
         while(minute>0):
             if waveform == "pulse":
-                wave = pulse_gen_with_rr(min_amp, max_amp, samples, duration, hr, rr, rr_step)
+                wave = pulse_gen_with_rr(min_amp, max_amp, samples, duty_circle, duration, hr, rr, rr_step)
             elif waveform == "sine":
-                wave = sine_gen_with_rr_v4(min_amp, max_amp, samples, duration, hr, rr, rr_step)
+                wave = sine_gen_with_rr_v4(min_amp, max_amp, samples, duty_circle, duration, hr, rr, rr_step)
             
             start_time = time.time()
             print('Start time:', start_time)
@@ -242,24 +242,29 @@ if __name__== '__main__':
     if args.option == 1:
         hr, rr, rr_step = 40, 8, 0.01
         max_amp, min_amp = 200, 0
+        duty_circle = 0.25
         waveform = 'sine'
     elif args.option == 2:
         hr, rr, rr_step = 64, 16, 0.02
         max_amp, min_amp =  256, 0
+        duty_circle = 0.5
         waveform = 'sine'
     elif args.option == 3:
         hr, rr, rr_step = 96, 24, 0.04
         max_amp, min_amp =  256, 0
+        duty_circle = 0.5
         waveform = 'sine'   
     elif args.option == 4:
         hr, rr, rr_step = 128, 32, 0.04
         max_amp, min_amp =  256, 0
+        duty_circle = 0.05
         waveform = 'pulse'  
     elif args.option == 5:
         hr, rr, rr_step = 160, 40, 0.04
         max_amp, min_amp =  512, 0
+        duty_circle = 0.05
         waveform = 'pulse'  
     
     print(get_mac())
     
-    main(hr, rr, rr_step, max_amp, min_amp, waveform, args.minute)
+    main(hr, rr, rr_step, max_amp, min_amp, waveform, duty_circle, args.minute)
