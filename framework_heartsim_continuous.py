@@ -32,23 +32,28 @@ if __name__== '__main__':
         if option == 1:
             hr, rr, rr_step = 40, 8, 0.01
             max_amp, min_amp = 200, 0
+            duty_circle = 0.25
             waveform = 'sine'
         elif option == 2:
             hr, rr, rr_step = 64, 16, 0.02
             max_amp, min_amp =  256, 0
+            duty_circle = 0.5
             waveform = 'sine'
         elif option == 3:
             hr, rr, rr_step = 96, 24, 0.04
             max_amp, min_amp =  256, 0
+            duty_circle = 0.5
             waveform = 'sine'   
         elif option == 4:
             hr, rr, rr_step = 128, 32, 0.04
             max_amp, min_amp =  256, 0
+            duty_circle = 0.05
             waveform = 'pulse'  
         elif option == 5:
             hr, rr, rr_step = 160, 40, 0.04
             max_amp, min_amp =  512, 0
+            duty_circle = 0.05
             waveform = 'pulse'  
         
         # print(get_mac())
-        main(hr, rr, rr_step, max_amp, min_amp, waveform, args.minute)
+        main(hr, rr, rr_step, max_amp, min_amp, waveform, duty_circle, args.minute)
