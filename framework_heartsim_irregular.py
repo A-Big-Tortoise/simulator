@@ -7,9 +7,7 @@ import board
 import adafruit_mcp4725 as a
 import time
 import paho.mqtt.client as mqtt
-from utils import pulse_gen_with_rr, sine_gen_with_rr_v4, get_mac
-
-
+from utils import pulse_gen_with_rr_irr, sine_gen_with_rr_irr
 
 
 def main(hr, rr, rr_step, max_amp, min_amp, waveform, duty_circle, minute, duration=180, samples=410):
@@ -73,7 +71,6 @@ if __name__== '__main__':
     parser.add_argument('--minute', type=int, default=3, help='Length of Working (Unit: min), default=3')
     args = parser.parse_args()
 
-    coeff = 0.67
     if args.option == 1:
         hr, rr, rr_step = 40, 8, 0.01
         max_amp, min_amp = 200, 0
@@ -99,7 +96,5 @@ if __name__== '__main__':
         max_amp, min_amp =  512, 0
         duty_circle = 0.05
         waveform = 'pulse'  
-    
-    print(get_mac())
-    
+        
     main(hr, rr, rr_step, max_amp, min_amp, waveform, duty_circle, args.minute)

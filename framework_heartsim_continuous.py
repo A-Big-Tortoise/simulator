@@ -32,7 +32,7 @@ if __name__== '__main__':
         if option == 1:
             hr, rr, rr_step = 40, 8, 0.01
             max_amp, min_amp = 200, 0
-            duty_circle = 0.25
+            duty_circle = 0.5
             waveform = 'sine'
         elif option == 2:
             hr, rr, rr_step = 64, 16, 0.02
