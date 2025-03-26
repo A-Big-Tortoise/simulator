@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 from scipy import signal
+from scipy.signal import resample
 
 
 def apply_amp(wave, max_amp, min_amp):
@@ -51,7 +52,7 @@ def sine_wave_base(samples, duty_cycle, hrv=None):
     wave = np.concatenate([sine_wave, zeros])
     if hrv:
         hrv_len = int(samples * random.uniform(-1 * hrv, hrv))
-        print(hrv_len)
+        # print(hrv_len)
         if hrv_len > 0: 
             wave = np.concatenate([wave, np.zeros(hrv_len)])
         elif hrv_len < 0:
@@ -95,6 +96,33 @@ def sine_gen_with_rr_irr(min_amp, max_amp, samples, duty_circle, duration, hr, r
     return wave, rr_waves_discrete
 
 
+def sine_gen_with_rr_irr_v2(min_amp, max_amp, samples, duty_circle, duration, hr, rr, rr_step):
+    hr_num = int(duration * hr / 60)
+    print(hr_num)
+    
+    hr_waves = [sine_wave_base(int(samples*60/hr), duty_circle) for _ in range(hr_num)]
+    hr_waves_len = [len(wave) for wave in hr_waves]
+    hr_waves = np.concatenate(hr_waves)
+    hr_waves = resample(hr_waves, samples*duration)
+    print(f'len hr waves: {len(hr_waves)}')
+    print(f'desried hr waves: {samples * duration}, actual hr waves: {len(hr_waves)}')
+
+    rr_waves = generate_rr_wave(rr, samples, duration)
+    print(f'len rr waves: {len(rr_waves)}')
+    rr_waves_discrete = np.zeros_like(rr_waves)
+
+    begin = 0
+    end = hr_waves_len[0]
+    for hr_wave_len in hr_waves_len:
+        end = begin + hr_wave_len
+        rr_waves_discrete[begin:end] = rr_waves[(2*begin + end) // 3]
+        begin = end
+
+    hr_waves = hr_waves * rr_waves_discrete
+    # hr_waves = np.interp(np.linspace(0, len(hr_waves), samples * duration), np.arange(len(hr_waves)), hr_waves)
+    wave = apply_amp(hr_waves, max_amp, min_amp)
+    return wave
+
 # def generate_increasing_amplitude_wave_array(i,step_size):
 #     step = step_size
 #     wave_array = np.arange(1, 1 + step * i, step)
@@ -109,27 +137,14 @@ def generate_rr_wave(rr, samples, duration):
 
 duration = 60
 rr = 7
-hr = 60
+hr = 40
+
+wave = sine_gen_with_rr_irr_v2(min_amp=0, max_amp=512, samples=410, duty_circle=0.5, duration=duration, hr=hr, rr=rr, rr_step=0.1)
 
 
-wave, rr_waves_discrete = sine_gen_with_rr_irr(min_amp=0, max_amp=512, samples=410, duty_circle=0.34, duration=duration, hr=hr, rr=rr, rr_step=0.1, hrv=0.12)
-rr_wave = generate_rr_wave(rr, 410, duration)
-
-
-row = 4
-fig, axes = plt.subplots(row, 1, figsize=(10, 1.75 * row), sharex=True)
-axes[0].plot(wave)
-axes[0].set_title(f'Heartbeats, HR:{hr}')
-axes[1].plot(rr_wave)
-axes[1].set_title(f'Respiration, RR:{rr}')
-axes[2].plot(rr_waves_discrete)
-axes[2].set_title('Respiration Discrete')
-min_len = min(len(wave), len(rr_waves_discrete))
-wave, rr_waves_discrete = wave[:min_len], rr_waves_discrete[:min_len]
-axes[3].plot(wave[:min_len] * rr_waves_discrete[:min_len])
-axes[3].set_title('Heartbeats * Respiration Discrete')
+plt.figure(figsize=(10, 2))
+plt.plot(wave)
+plt.title(f'HR:{hr}, RR:{rr}')
 plt.tight_layout()
-plt.savefig(f'/home/simulator2/simulator/figs/sine_wave_irr_hr{hr}_rr{rr}.png')
+plt.savefig(f'/home/simulator2/simulator/figs/sine_wave_irr_hr{hr}_rr{rr}_nohrv.png')
 plt.close()
-
-

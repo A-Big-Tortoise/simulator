@@ -7,7 +7,7 @@ import board
 import adafruit_mcp4725 as a
 import time
 import paho.mqtt.client as mqtt
-from utils import pulse_gen_with_rr, sine_gen_with_rr_v4, get_mac
+from utils import pulse_gen_with_rr, sine_gen_with_rr_v4, get_mac, sine_gen_with_rr_irr_v2
 
 
 
@@ -21,10 +21,10 @@ def main(hr, rr, rr_step, max_amp, min_amp, waveform, duty_circle, minute, durat
 
     try:
         while(minute>0):
-            if waveform == "pulse":
-                wave = pulse_gen_with_rr(min_amp, max_amp, samples, duty_circle, duration, hr, rr, rr_step)
-            elif waveform == "sine":
-                wave = sine_gen_with_rr_v4(min_amp, max_amp, samples, duty_circle, duration, hr, rr, rr_step)
+            # if waveform == "pulse":
+                # wave = pulse_gen_with_rr(min_amp, max_amp, samples, duty_circle, duration, hr, rr, rr_step)
+            # elif waveform == "sine":
+            wave = sine_gen_with_rr_irr_v2(min_amp, max_amp, samples, duty_circle, duration, hr, rr, rr_step)
             
             start_time = time.time()
             print('Start time:', start_time)
@@ -61,45 +61,18 @@ def main(hr, rr, rr_step, max_amp, min_amp, waveform, duty_circle, minute, durat
 
 if __name__== '__main__':
     
-    """
-    option 1, HR 40, RR 8
-    option 2, HR 64, RR 16
-    option 3, HR 96, RR 24
-    option 4, HR 128, RR 32
-    option 5, HR 160, RR 40
-    """
     parser = argparse.ArgumentParser(description='Heartbeat Simulator', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--option', type=int, help='Different HR and RR Combination')
+    parser.add_argument('--hr', type=int)
+    parser.add_argument('--rr', type=int)
     parser.add_argument('--minute', type=int, default=3, help='Length of Working (Unit: min), default=3')
     args = parser.parse_args()
 
-    coeff = 0.67
-    if args.option == 1:
-        hr, rr, rr_step = 40, 8, 0.01
-        max_amp, min_amp = 200, 0
-        duty_circle = 0.5
-        waveform = 'sine'
-    elif args.option == 2:
-        hr, rr, rr_step = 64, 16, 0.02
-        max_amp, min_amp =  256, 0
-        duty_circle = 0.5
-        waveform = 'sine'
-    elif args.option == 3:
-        hr, rr, rr_step = 96, 24, 0.04
-        max_amp, min_amp =  256, 0
-        duty_circle = 0.5
-        waveform = 'sine'   
-    elif args.option == 4:
-        hr, rr, rr_step = 128, 32, 0.04
-        max_amp, min_amp =  256, 0
-        duty_circle = 0.05
-        waveform = 'pulse'  
-    elif args.option == 5:
-        hr, rr, rr_step = 160, 40, 0.04
-        max_amp, min_amp =  512, 0
-        duty_circle = 0.05
-        waveform = 'pulse'  
-    
+
+    hr, rr, rr_step = 64, 16, 0.02
+    max_amp, min_amp =  256, 0
+    duty_circle = 0.5
+    waveform = 'sine'
+
     print(get_mac())
     
-    main(hr, rr, rr_step, max_amp, min_amp, waveform, duty_circle, args.minute)
+    main(args.hr, args.rr, rr_step, max_amp, min_amp, waveform, duty_circle, args.minute)

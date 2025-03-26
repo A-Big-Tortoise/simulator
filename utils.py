@@ -39,7 +39,8 @@ def pack_beddot_data(mac_addr, timestamp, data_interval, data):
 
 
 def write_mqtt(hrdata, rrdata, timestamp, fs):
-    mac_addr=get_mac()
+    # mac_addr=get_mac()
+    mac_addr = "12:12:12:12:12:12"
     timestamp = int(timestamp * 1000000)
     hrdata = np.int32(hrdata)
     rrdata = np.int32(rrdata)
@@ -48,7 +49,8 @@ def write_mqtt(hrdata, rrdata, timestamp, fs):
     packed_data_2 = pack_beddot_data(mac_addr, timestamp, Ts, rrdata)
 
     client = mqtt.Client()
-    client.connect("yuantzg.com", 9183)
+    # client.connect("yuantzg.com", 9183)
+    client.connect("sensorweb.com", 8883)
     mqtt_thread = threading.Thread(target=lambda: client.loop_forever())
     mqtt_thread.start()
 
@@ -207,3 +209,37 @@ def sine_gen_with_rr_irr(min_amp, max_amp, samples, duty_circle, duration, hr, r
     
     wave = apply_amp(wave, max_amp, min_amp)
     return wave
+
+
+def sine_gen_with_rr_irr_v2(min_amp, max_amp, samples, duty_circle, duration, hr, rr, rr_step):
+    hr_num = int(duration * hr / 60)
+    print(hr_num)
+    
+    hr_waves = [sine_wave_base(int(samples*60/hr), duty_circle) for _ in range(hr_num)]
+    hr_waves_len = [len(wave) for wave in hr_waves]
+    hr_waves = np.concatenate(hr_waves)
+    hr_waves = signal.resample(hr_waves, samples*duration)
+    print(f'len hr waves: {len(hr_waves)}')
+    print(f'desried hr waves: {samples * duration}, actual hr waves: {len(hr_waves)}')
+
+    rr_waves = generate_rr_wave(rr, samples, duration)
+    print(f'len rr waves: {len(rr_waves)}')
+    rr_waves_discrete = np.zeros_like(rr_waves)
+
+    begin = 0
+    end = hr_waves_len[0]
+    for hr_wave_len in hr_waves_len:
+        end = begin + hr_wave_len
+        rr_waves_discrete[begin:end] = rr_waves[(2*begin + end) // 3]
+        begin = end
+
+    hr_waves = hr_waves * rr_waves_discrete
+    # hr_waves = np.interp(np.linspace(0, len(hr_waves), samples * duration), np.arange(len(hr_waves)), hr_waves)
+    wave = apply_amp(hr_waves, max_amp, min_amp)
+    return wave
+
+
+def generate_rr_wave(rr, samples, duration):
+    t = np.linspace(0, duration, samples * duration, endpoint=False)
+    rr_wave = signal.sawtooth(2 * np.pi * (rr/60) * t) / 2 + 1
+    return rr_wave
