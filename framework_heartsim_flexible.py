@@ -7,7 +7,7 @@ import board
 import adafruit_mcp4725 as a
 import time
 import paho.mqtt.client as mqtt
-from utils import pulse_gen_with_rr, sine_gen_with_rr_v4, get_mac, sine_gen_with_rr_irr_v2
+from utils import pulse_gen_with_rr, sine_gen_with_rr_v4, get_mac, sine_gen_with_rr_irr_v2, write_mqtt
 
 
 
@@ -21,6 +21,8 @@ def main(hr, rr, rr_step, max_amp, min_amp, waveform, duty_circle, minute, durat
 
     try:
         while(minute>0):
+            hr_array = np.repeat(hr, duration)
+            rr_array = np.repeat(rr, duration)
             # if waveform == "pulse":
                 # wave = pulse_gen_with_rr(min_amp, max_amp, samples, duty_circle, duration, hr, rr, rr_step)
             # elif waveform == "sine":
@@ -39,8 +41,7 @@ def main(hr, rr, rr_step, max_amp, min_amp, waveform, duty_circle, minute, durat
             # print('End time:', end_time)
             
             ## Write Labels for 10s, each label after 1s
-            hr_array = np.repeat(hr, duration)
-            rr_array = np.repeat(rr, duration)
+
             write_mqtt(hr_array, rr_array, start_time, 1)
 
             final_time = time.time()
@@ -56,6 +57,7 @@ def main(hr, rr, rr_step, max_amp, min_amp, waveform, duty_circle, minute, durat
             minute -=1
             
     except KeyboardInterrupt:
+        write_mqtt(hr_array, rr_array, start_time, 1)
         print('End')
 
 
@@ -64,14 +66,15 @@ if __name__== '__main__':
     parser = argparse.ArgumentParser(description='Heartbeat Simulator', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--hr', type=int)
     parser.add_argument('--rr', type=int)
-    parser.add_argument('--minute', type=int, default=3, help='Length of Working (Unit: min), default=3')
+    parser.add_argument('--minute', type=int, default=1, help='Length of Working (Unit: min), default=3')
     args = parser.parse_args()
 
 
-    hr, rr, rr_step = 64, 16, 0.02
+    rr_step = 0.02
     max_amp, min_amp =  256, 0
     duty_circle = 0.5
     waveform = 'sine'
+    #waveform = 'pulse'
 
     print(get_mac())
     

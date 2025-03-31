@@ -99,16 +99,21 @@ def sine_gen_with_rr_irr(min_amp, max_amp, samples, duty_circle, duration, hr, r
 def sine_gen_with_rr_irr_v2(min_amp, max_amp, samples, duty_circle, duration, hr, rr, rr_step):
     hr_num = int(duration * hr / 60)
     print(hr_num)
-    
+
+    # generate heartbeat one by one
     hr_waves = [sine_wave_base(int(samples*60/hr), duty_circle) for _ in range(hr_num)]
     hr_waves_len = [len(wave) for wave in hr_waves]
     hr_waves = np.concatenate(hr_waves)
     hr_waves = resample(hr_waves, samples*duration)
+
     print(f'len hr waves: {len(hr_waves)}')
     print(f'desried hr waves: {samples * duration}, actual hr waves: {len(hr_waves)}')
 
+    # genearate rr wave
     rr_waves = generate_rr_wave(rr, samples, duration)
     print(f'len rr waves: {len(rr_waves)}')
+
+    # use heartbeats to do sample on continuous rr wave
     rr_waves_discrete = np.zeros_like(rr_waves)
 
     begin = 0
@@ -118,8 +123,10 @@ def sine_gen_with_rr_irr_v2(min_amp, max_amp, samples, duty_circle, duration, hr
         rr_waves_discrete[begin:end] = rr_waves[(2*begin + end) // 3]
         begin = end
 
+    # apply rr on hr
     hr_waves = hr_waves * rr_waves_discrete
-    # hr_waves = np.interp(np.linspace(0, len(hr_waves), samples * duration), np.arange(len(hr_waves)), hr_waves)
+
+    # normalize 
     wave = apply_amp(hr_waves, max_amp, min_amp)
     return wave
 
@@ -131,15 +138,17 @@ def sine_gen_with_rr_irr_v2(min_amp, max_amp, samples, duty_circle, duration, hr
 
 def generate_rr_wave(rr, samples, duration):
     t = np.linspace(0, duration, samples * duration, endpoint=False)
-    rr_wave = signal.sawtooth(2 * np.pi * (rr/60) * t) / 2 + 1
+    rr_wave = signal.sawtooth(2 * np.pi * (rr/60) * t) 
+    rr_wave = apply_amp(rr_wave, 1, 0.5)
     return rr_wave
 
 
 duration = 60
-rr = 7
+rr = 12
 hr = 40
 
 wave = sine_gen_with_rr_irr_v2(min_amp=0, max_amp=512, samples=410, duty_circle=0.5, duration=duration, hr=hr, rr=rr, rr_step=0.1)
+
 
 
 plt.figure(figsize=(10, 2))

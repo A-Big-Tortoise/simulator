@@ -24,14 +24,14 @@ if __name__== '__main__':
     option 5, HR 160, RR 40
     """
     parser = argparse.ArgumentParser(description='Heartbeat Simulator', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--minute', type=int, default=1, help='Length of Working (Unit: min), default=3')
+    parser.add_argument('--minute', type=int, default=2, help='Length of Working (Unit: min), default=3')
     args = parser.parse_args()
 
     for option in range(1, 6):
 
         if option == 1:
-            hr, rr, rr_step = 40, 8, 0.01
-            max_amp, min_amp = 200, 0
+            hr, rr, rr_step = 40, 8, 0.02
+            max_amp, min_amp = 256, 0
             duty_circle = 0.5
             waveform = 'sine'
         elif option == 2:

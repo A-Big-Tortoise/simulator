@@ -50,7 +50,7 @@ def write_mqtt(hrdata, rrdata, timestamp, fs):
 
     client = mqtt.Client()
     # client.connect("yuantzg.com", 9183)
-    client.connect("sensorweb.com", 8883)
+    client.connect("sensorweb.us", 1883)
     mqtt_thread = threading.Thread(target=lambda: client.loop_forever())
     mqtt_thread.start()
 
@@ -241,5 +241,6 @@ def sine_gen_with_rr_irr_v2(min_amp, max_amp, samples, duty_circle, duration, hr
 
 def generate_rr_wave(rr, samples, duration):
     t = np.linspace(0, duration, samples * duration, endpoint=False)
-    rr_wave = signal.sawtooth(2 * np.pi * (rr/60) * t) / 2 + 1
+    rr_wave = signal.sawtooth(2 * np.pi * (rr/60) * t) 
+    rr_wave = apply_amp(rr_wave, 1, 0.9)
     return rr_wave

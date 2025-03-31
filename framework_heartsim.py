@@ -7,7 +7,7 @@ import board
 import adafruit_mcp4725 as a
 import time
 import paho.mqtt.client as mqtt
-from utils import pulse_gen_with_rr, sine_gen_with_rr_v4, get_mac
+from utils import pulse_gen_with_rr, sine_gen_with_rr_v4, get_mac, write_mqtt
 
 
 
