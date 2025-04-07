@@ -42,7 +42,7 @@ def main(hr, rr, rr_step, max_amp, min_amp, waveform, duty_circle, minute, durat
             
             ## Write Labels for 10s, each label after 1s
 
-            write_mqtt(hr_array, rr_array, start_time, 1)
+#            write_mqtt(hr_array, rr_array, start_time, 1)
 
             final_time = time.time()
             print('Final time:', final_time)
@@ -57,7 +57,7 @@ def main(hr, rr, rr_step, max_amp, min_amp, waveform, duty_circle, minute, durat
             minute -=1
             
     except KeyboardInterrupt:
-        write_mqtt(hr_array, rr_array, start_time, 1)
+#        write_mqtt(hr_array, rr_array, start_time, 1)
         print('End')
 
 
@@ -71,10 +71,10 @@ if __name__== '__main__':
 
 
     rr_step = 0.02
-    max_amp, min_amp =  256, 0
+    max_amp, min_amp =  200, 0
     duty_circle = 0.5
     waveform = 'sine'
-    #waveform = 'pulse'
+    # waveform = 'pulse'
 
     print(get_mac())
     

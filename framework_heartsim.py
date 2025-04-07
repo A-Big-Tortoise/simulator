@@ -73,27 +73,26 @@ if __name__== '__main__':
     parser.add_argument('--minute', type=int, default=3, help='Length of Working (Unit: min), default=3')
     args = parser.parse_args()
 
-    coeff = 0.67
     if args.option == 1:
-        hr, rr, rr_step = 40, 8, 0.01
+        hr, rr, rr_step = 40, 8, 0.02
         max_amp, min_amp = 200, 0
         duty_circle = 0.5
         waveform = 'sine'
     elif args.option == 2:
         hr, rr, rr_step = 64, 16, 0.02
-        max_amp, min_amp =  256, 0
+        max_amp, min_amp =  200, 0
         duty_circle = 0.5
         waveform = 'sine'
     elif args.option == 3:
-        hr, rr, rr_step = 96, 24, 0.04
-        max_amp, min_amp =  256, 0
+        hr, rr, rr_step = 96, 24, 0.02
+        max_amp, min_amp =  200, 0
         duty_circle = 0.5
         waveform = 'sine'   
     elif args.option == 4:
-        hr, rr, rr_step = 128, 32, 0.04
-        max_amp, min_amp =  256, 0
+        hr, rr, rr_step = 128, 32, 0.02
+        max_amp, min_amp =  200, 0
         duty_circle = 0.05
-        waveform = 'pulse'  
+        waveform = 'sine'  
     elif args.option == 5:
         hr, rr, rr_step = 160, 40, 0.04
         max_amp, min_amp =  512, 0
